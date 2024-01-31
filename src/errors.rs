@@ -1,3 +1,7 @@
+//! # Storage Errors Module
+//!
+//! The `storage_errors` module defines custom error types for storage-related
+//! operations.
 use std::collections::BTreeMap;
 
 #[derive(Debug, thiserror::Error)]

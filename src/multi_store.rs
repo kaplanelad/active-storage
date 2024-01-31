@@ -1,3 +1,16 @@
+//! # MultiStore Module
+//!
+//! The `multi_store` module defines a struct `MultiStore` for managing multiple
+//! stores, including a primary store and mirrors. It also introduces a `Mirror`
+//! struct for performing mirroring operations across multiple stores.
+//!
+//! ## Example
+//!
+//! ```rust
+//! # #[cfg(feature = "derive")] {
+#![doc = include_str!("../examples/multi.rs")]
+//! # }
+//! ```
 use std::{
     collections::{BTreeMap, HashMap},
     path::Path,

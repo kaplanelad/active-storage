@@ -1,3 +1,15 @@
+//! # Store Module
+//!
+//! The `store` module defines a `Store` struct, representing a storage unit
+//! with associated methods for file operations.
+//!
+//! ## Example Usage
+//!
+//! ```rust
+//! # #[cfg(feature = "derive")] {
+#![doc = include_str!("../examples/disk.rs")]
+//! # }
+//! ```
 use std::path::Path;
 
 use crate::{

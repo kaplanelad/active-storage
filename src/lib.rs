@@ -1,7 +1,33 @@
-//! # Store Module
+//! # Active Storage
 //!
-//! The [`store`] module provides a flexible storage abstraction with
-//! configurable drivers.
+//! Active Storage streamlines the process of uploading files to cloud storage,
+//! offering both local disk-based and in-memory services for development and
+//! testing. Additionally, it supports mirroring files to subordinate services,
+//! enhancing capabilities for backups and migrations.
+//!
+//! It's inspired by Rails [Active Store](https://guides.rubyonrails.org/active_storage_overview.html)
+//!
+//! ## Services
+//!
+//! * [Disk](./examples/disk.rs)
+//! * [In Memory](./examples/in_memory.rs)
+//! * [AWS S3](./examples/aws_s3.rs) - Requires enabling the `aws_s3` feature.
+//!
+//! ## Examples
+//!
+//! ```rust
+//! # #[cfg(feature = "derive")] {
+#![doc = include_str!("../examples/disk.rs")]
+//! # }
+//! ```
+//! 
+//! ### Mirroring
+//! ```rust
+//! # #[cfg(feature = "derive")] {
+#![doc = include_str!("../examples/multi.rs")]
+//! # }
+//! ```
+
 mod contents;
 pub mod drivers;
 pub mod errors;
@@ -19,12 +45,10 @@ pub mod store;
 ///   `inmem` feature is enabled.
 ///
 /// - `AwsS3`: AWS S3 storage variant. This variant is available when the
-///   `aws_s3` feature is enabled. It includes a configuration parameter of type
-///   [`drivers::aws_s3::Config`].
+///   `aws_s3` feature is enabled. It includes a configuration parameter.
 ///
 /// - `Disk`: Disk storage variant. This variant is available when the `disk`
-///   feature is enabled. It includes a configuration parameter of type
-///   [`drivers::disk::Config`].
+///   feature is enabled. It includes a configuration parameter.
 pub enum StoreConfig {
     #[cfg(feature = "inmem")]
     InMem(),

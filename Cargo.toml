@@ -1,6 +1,6 @@
 [package]
 name = "active-storage"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Active Storage facilitates uploading files to a cloud storage"
 license = "Apache-2.0"
