@@ -1,0 +1,28 @@
+---
+source: src/drivers/inmem.rs
+expression: driver
+---
+InMemoryDriver {
+    files: Mutex {
+        data: {
+            "bar/file-2.txt": File {
+                content: [],
+                last_modified: SystemTime {
+                    tv_sec: TV_SEC
+                    tv_sec: TV_NSEC
+                },
+            },
+        },
+        poisoned: false,
+        ..
+    },
+    directory: Mutex {
+        data: {
+            "bar": [
+                "bar/file-2.txt",
+            ],
+        },
+        poisoned: false,
+        ..
+    },
+}

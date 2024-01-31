@@ -1,0 +1,48 @@
+[package]
+name = "active-storage"
+version = "0.1.0"
+edition = "2021"
+description = ""
+license = "Apache-2.0"
+authors = ["Kaplan Elad <kaplan.elad@gmail.com>"]
+documentation = "https://docs.rs/active-store"
+repository = "https://github.com/kaplanelad/active-store"
+keywords = []
+readme = "README.md"
+
+[features]
+default = ["disk", "inmem"]
+disk = ["dep:tokio", "tokio/fs"]
+inmem = []
+aws_s3 = [
+    "dep:aws-sdk-s3",
+    "dep:aws-types",
+    "dep:aws-smithy-runtime-api",
+    "dep:aws-smithy-types",
+]
+
+[[example]]
+name = "aws_s3"
+required-features = ["aws_s3"]
+
+[dependencies]
+async-trait = { version = "0.1.77" }
+dyn-clone = { version = "1.0.16" }
+tokio = { version = "1.35.1", default-features = false, features = [
+    "fs",
+], optional = true }
+thiserror = { version = "1.0.56" }
+aws-smithy-types = { version = "1.1.1", optional = true }
+aws-smithy-runtime-api = { version = "1.1.1", optional = true }
+aws-sdk-s3 = { version = "1.8.0", features = [
+    "behavior-version-latest",
+], optional = true }
+aws-types = { version = "1.1.1", optional = true }
+
+[dev-dependencies]
+tokio = { version = "1.35.1", features = ["rt-multi-thread", "rt", "macros"] }
+insta = { version = "1.34.0", features = ["filters"] }
+dockertest-server = { version = "0.1.7", features = ["cloud"] }
+lazy_static = "1.4.0"
+tree-fs = "0.1.0"
+rstest = "0.18.2"

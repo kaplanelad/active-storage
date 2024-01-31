@@ -1,0 +1,12 @@
+---
+source: tests/multi.rs
+expression: res
+---
+Err(
+    MirrorFailedOnStores(
+        {
+            "store-2": ResourceNotFound,
+            "store-3": ResourceNotFound,
+        },
+    ),
+)
