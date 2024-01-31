@@ -12,7 +12,7 @@ impl Contents {
     #[cfg(feature = "aws_s3")]
     /// Creates a new `Contents` instance from a byte stream.
     ///
-    /// This function is available only when the "aws_s3" feature is enabled.
+    /// This function is available only when the "`aws_s3`" feature is enabled.
     /// # Returns
     ///
     /// Returns a `Result` containing a `Contents` instance with the collected
