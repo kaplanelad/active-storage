@@ -2,7 +2,6 @@
 //!
 //! The `storage_driver` module defines a trait `Driver` that represents a
 //! storage driver, providing methods.
-//!
 use std::{path::Path, time::SystemTime};
 
 use dyn_clone::DynClone;
