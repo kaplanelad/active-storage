@@ -2,11 +2,11 @@
 name = "active-storage"
 version = "0.1.0"
 edition = "2021"
-description = ""
+description = "Active Storage facilitates uploading files to a cloud storage"
 license = "Apache-2.0"
 authors = ["Kaplan Elad <kaplan.elad@gmail.com>"]
-documentation = "https://docs.rs/active-store"
-repository = "https://github.com/kaplanelad/active-store"
+documentation = "https://docs.rs/active-storage"
+repository = "https://github.com/kaplanelad/active-storage"
 keywords = []
 readme = "README.md"
 
