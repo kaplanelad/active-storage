@@ -1,3 +1,5 @@
+[![Current Crates.io Version](https://img.shields.io/crates/v/active-storage.svg)](https://crates.io/crates/active-storage)
+
 # Active Storage
 
 Active Storage streamlines the process of uploading files to cloud storage, offering both local disk-based and in-memory services for development and testing. Additionally, it supports mirroring files to subordinate services, enhancing capabilities for backups and migrations.
