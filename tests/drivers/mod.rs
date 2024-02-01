@@ -5,3 +5,4 @@ mod disk;
 mod flow;
 #[cfg(feature = "inmem")]
 mod inmem;
+mod gcp_storage;

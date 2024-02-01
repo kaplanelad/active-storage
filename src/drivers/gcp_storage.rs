@@ -3,6 +3,10 @@ use std::time::SystemTime;
 use async_trait::async_trait;
 use google_cloud_storage::client::{Client, ClientConfig};
 use google_cloud_storage::client::google_cloud_auth::credentials::CredentialsFile;
+use google_cloud_storage::client::google_cloud_auth::error::Error;
+use google_cloud_storage::http;
+use google_cloud_storage::http::objects::download::Range;
+use google_cloud_storage::http::objects::get::GetObjectRequest;
 use google_cloud_storage::http::objects::list::ListObjectsRequest;
 use crate::drivers::Driver;
 use crate::errors::{DriverError, DriverResult};
@@ -99,13 +103,54 @@ impl GoogleCloudStorage {
 }
 
 #[async_trait]
-impl Driver for GoogleCloudStorage{
+impl Driver for GoogleCloudStorage {
+    /// Reads the contents of a file at the specific path within the Google Cloud Storage.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if there is an issue reading from the file or decoding its contents.
     async fn read(&self, path: &Path) -> DriverResult<Vec<u8>> {
-        todo!()
+        let request = &GetObjectRequest {
+            bucket: self.bucket.to_string(),
+            object: path.to_str().ok_or(DriverError::InvalidPath)?.to_string(),
+            ..Default::default()
+        };
+        let result = self.client.download_object(request, &Range::default()).await;
+        match result {
+            Ok(response) => {
+                Ok(response)
+            }
+            Err(e) => {
+                Err(DriverError::Any(Box::new(e)))
+            }
+        }
     }
 
+    /// Checks if a file exists at the specified path within the Google Cloud Storage.
+    ///
+    /// If the file does not point to a file, the method returns `Ok(false)`.
+    /// Otherwise, it checks if the file exists and returns the result.
+    ///
+    /// # Errors
+    /// Returns an error if there is an issue occurs when checking existence of the file.
     async fn file_exists(&self, path: &Path) -> DriverResult<bool> {
-        todo!()
+        let path_str = path.to_str().ok_or(DriverError::InvalidPath)?;
+        let request = &GetObjectRequest {
+            bucket: self.bucket.to_string(),
+            object: path_str.to_string(),
+            ..Default::default()
+        };
+        match self.client.get_object(request).await {
+            Ok(_) => Ok(true),
+            Err(e) => {
+                if let http::Error::Response(e) = &e {
+                    if e.code == 404 {
+                        return Ok(false);
+                    }
+                }
+                return Err(DriverError::Any(Box::new(e)));
+            }
+        }
     }
 
     async fn write(&self, path: &Path, content: Vec<u8>) -> DriverResult<()> {
