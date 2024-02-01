@@ -16,6 +16,8 @@ pub mod inmem;
 
 #[cfg(feature = "aws_s3")]
 pub mod aws_s3;
+#[cfg(feature = "gcp_storage")]
+mod gcp_storage;
 
 #[async_trait::async_trait]
 pub trait Driver: DynClone + Sync + Send {
