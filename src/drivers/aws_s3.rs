@@ -25,6 +25,8 @@ pub struct Config {
     pub region: String,
     /// Optional credentials for authenticating with the AWS S3 service.
     pub credentials: Option<ClientCredentials>,
+    // The endpoint URL used to communicate with this service
+    pub endpoint_url: String,
 }
 
 /// Credentials for authenticating with the AWS S3 service.
@@ -57,6 +59,7 @@ impl AwsS3 {
     pub fn new(config: Config) -> Self {
         let mut client_builder = aws_sdk_s3::Config::builder()
             .force_path_style(true)
+            .endpoint_url(config.endpoint_url)
             .region(Region::new(config.region));
 
         if let Some(credentials) = config.credentials {
