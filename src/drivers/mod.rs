@@ -17,6 +17,9 @@ pub mod inmem;
 #[cfg(feature = "aws_s3")]
 pub mod aws_s3;
 
+#[cfg(feature = "azure")]
+pub mod azure;
+
 #[async_trait::async_trait]
 pub trait Driver: DynClone + Sync + Send {
     async fn read(&self, path: &Path) -> DriverResult<Vec<u8>>;
