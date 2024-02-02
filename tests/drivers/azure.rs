@@ -82,8 +82,6 @@ impl azure::ClientBuilderTrait for MockClient {
                 date: SystemTime::now().into(),
             })
         }
-
-        // Ok(res)
     }
 
     async fn get_properties(
