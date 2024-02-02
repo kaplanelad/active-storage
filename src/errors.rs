@@ -6,6 +6,9 @@ use std::collections::BTreeMap;
 
 #[derive(Debug, thiserror::Error)]
 pub enum DriverError {
+    #[error("Authentication failed")]
+    AuthenticationFailed,
+
     #[error("Resource not found")]
     ResourceNotFound,
 
