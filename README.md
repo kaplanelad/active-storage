@@ -12,6 +12,7 @@ It's inspired by Rails [Active Store](https://guides.rubyonrails.org/active_stor
 * [Disk](./examples/disk.rs)
 * [In Memory](./examples/in_memory.rs)
 * [AWS S3](./examples/aws_s3.rs) - Requires enabling the `aws_s3` feature.
+* [Azure](./examples/azure.rs) - Requires enabling the `azure` feature.
 
 
 ## Single Store Usage Example

@@ -16,7 +16,7 @@ pub struct File {
 
 #[derive(Debug, Default)]
 pub struct InMemoryDriver {
-    files: Mutex<BTreeMap<PathBuf, File>>,
+    pub files: Mutex<BTreeMap<PathBuf, File>>,
     directory: Mutex<BTreeMap<PathBuf, Vec<PathBuf>>>,
 }
 

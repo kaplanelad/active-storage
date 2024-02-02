@@ -49,13 +49,18 @@ pub mod store;
 ///
 /// - `Disk`: Disk storage variant. This variant is available when the `disk`
 ///   feature is enabled. It includes a configuration parameter.
+///
+/// - `Azure`: Azure storage variant. This variant is available when the `azure`
+///   feature is enabled. It includes a configuration parameter.
 pub enum StoreConfig {
     #[cfg(feature = "inmem")]
     InMem(),
-    #[cfg(feature = "aws_s3")]
-    AwsS3(drivers::aws_s3::Config),
     #[cfg(feature = "disk")]
     Disk(drivers::disk::Config),
+    #[cfg(feature = "aws_s3")]
+    AwsS3(drivers::aws_s3::Config),
+    #[cfg(feature = "azure")]
+    Azure(drivers::azure::Config),
 }
 
 /// `StoreConfig` represents the configuration for creating a [`store::Store`]
@@ -90,13 +95,17 @@ impl StoreConfig {
             Self::InMem() => {
                 Box::<drivers::inmem::InMemoryDriver>::default() as Box<dyn drivers::Driver>
             }
+            #[cfg(feature = "disk")]
+            Self::Disk(config) => {
+                Box::new(drivers::disk::DiskDriver::new(config).await?) as Box<dyn drivers::Driver>
+            }
             #[cfg(feature = "aws_s3")]
             Self::AwsS3(config) => {
                 Box::new(drivers::aws_s3::AwsS3::new(config)) as Box<dyn drivers::Driver>
             }
-            #[cfg(feature = "disk")]
-            Self::Disk(config) => {
-                Box::new(drivers::disk::DiskDriver::new(config).await?) as Box<dyn drivers::Driver>
+            #[cfg(feature = "azure")]
+            Self::Azure(config) => {
+                Box::new(drivers::azure::AzureDriver::new(config)) as Box<dyn drivers::Driver>
             }
         };
 
