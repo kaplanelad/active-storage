@@ -21,7 +21,7 @@ pub trait ClientBuilderTrait: DynClone + Sync + Send {
     /// Download the content of an object in the Google Cloud Storage.
     async fn download_object(&self, bucket: &str, path: &str) -> Result<Vec<u8>, http::Error>;
     /// Get the metadata of an object in the Google Cloud Storage.
-    async fn get_object(&self, bucket: &str, path: &str) -> Result<Object, http::Error>;
+    async fn get_object_details(&self, bucket: &str, path: &str) -> Result<Object, http::Error>;
     /// Check if an object exists in the Google Cloud Storage.
     async fn object_exists(&self, bucket: &str, path: &str) -> Result<bool, http::Error>;
     /// Upload an object to the Google Cloud Storage.
@@ -29,7 +29,7 @@ pub trait ClientBuilderTrait: DynClone + Sync + Send {
     /// Delete an object from the Google Cloud Storage.
     async fn delete_objects(&self, bucket: &str, path: &str) -> Result<(), http::Error>;
     /// List all objects in the Google Cloud Storage.
-    async fn list_objects(&self, bucket: &str, path: &str) -> Result<ListObjectsResponse, http::Error>;
+    async fn list_objects(&self, bucket: &str, path: &str) -> Result<Vec<PathBuf>, http::Error>;
 }
 
 #[derive(Clone)]
@@ -54,7 +54,7 @@ impl ClientBuilderTrait for Client {
         };
         self.client.download_object(request, &Range::default()).await
     }
-    async fn get_object(&self, bucket: &str, path: &str) -> Result<Object, http::Error> {
+    async fn get_object_details(&self, bucket: &str, path: &str) -> Result<Object, http::Error> {
         let request = &GetObjectRequest {
             bucket: bucket.to_string(),
             object: path.to_string(),
@@ -64,7 +64,7 @@ impl ClientBuilderTrait for Client {
     }
 
     async fn object_exists(&self, bucket: &str, path: &str) -> Result<bool, Error> {
-        match self.get_object(bucket, path).await {
+        match self.get_object_details(bucket, path).await {
             Ok(_) => Ok(true),
             Err(e) => {
                 match e {
@@ -98,13 +98,18 @@ impl ClientBuilderTrait for Client {
         self.client.delete_object(request).await
     }
 
-    async fn list_objects(&self, bucket: &str, path: &str) -> Result<ListObjectsResponse, Error> {
+    async fn list_objects(&self, bucket: &str, path: &str) -> Result<Vec<PathBuf>, Error> {
         let request = &ListObjectsRequest {
             bucket: bucket.to_string(),
             prefix: Some(format!("{}/", path)),
             ..Default::default()
         };
-        self.client.list_objects(request).await
+        let mut paths = Vec::new();
+        let result = self.client.list_objects(request).await?;
+        if let Some(items) = result.items {
+            paths.extend(items.into_iter().map(|item| PathBuf::from(format!("{}/{}", item.bucket, item.name))));
+        }
+        Ok(paths)
     }
 }
 
@@ -165,7 +170,7 @@ impl GoogleCloudStorage {
 
     /// Creates a new `GoogleCloudStorage` instance with the provided `Client` and bucket name.
     #[must_use]
-    pub fn with_client(client: Box<dyn ClientBuilderTrait>, bucket: &str) -> Self {
+    pub fn with_client(bucket: &str, client: Box<dyn ClientBuilderTrait>) -> Self {
         Self { client, bucket: bucket.to_string() }
     }
 
@@ -180,19 +185,8 @@ impl GoogleCloudStorage {
     /// A `Result` containing a vector of `PathBuf` representing the file paths,
     /// or an error
     async fn get_all_files_in_path(&self, path: &Path) -> DriverResult<Vec<PathBuf>> {
-        let mut paths = Vec::new();
         let path = path.to_str().ok_or(DriverError::InvalidPath)?;
-        let result = self.client.list_objects(&self.bucket, path).await;
-        match result {
-            Ok(response) => {
-                if let Some(items) = response.items {
-                    paths.extend(items.into_iter().map(|item| PathBuf::from(format!("{}/{}", item.bucket, item.name))));
-                }
-            }
-            Err(e) => {
-                return Err(DriverError::Any(Box::new(e)));
-            }
-        }
+        let paths = self.client.list_objects(&self.bucket, path).await?;
         Ok(paths)
     }
 }
@@ -303,7 +297,7 @@ impl Driver for GoogleCloudStorage {
     /// `DriverError::ResourceNotFound` is returned.
     async fn last_modified(&self, path: &Path) -> DriverResult<SystemTime> {
         let path = path.to_str().ok_or(DriverError::InvalidPath)?;
-        let object = self.client.get_object(&self.bucket, path).await?;
+        let object = self.client.get_object_details(&self.bucket, path).await?;
         let last_modified = object.updated.unwrap_or(object.time_created.unwrap());
         Ok(SystemTime::from(last_modified))
     }
