@@ -20,7 +20,7 @@
 #![doc = include_str!("../examples/disk.rs")]
 //! # }
 //! ```
-//! 
+//!
 //! ### Mirroring
 //! ```rust
 //! # #[cfg(feature = "derive")] {
@@ -111,7 +111,8 @@ impl StoreConfig {
             }
             #[cfg(feature = "gcp_storage")]
             Self::Gcp(config) => {
-                Box::new(drivers::gcp_storage::GoogleCloudStorage::new(config).await?) as Box<dyn drivers::Driver>
+                Box::new(drivers::gcp_storage::GoogleCloudStorage::new(config).await?)
+                    as Box<dyn drivers::Driver>
             }
         };
 

@@ -1,12 +1,11 @@
-use std::path::PathBuf;
-use std::time::SystemTime;
-use google_cloud_storage::http::Error;
-use google_cloud_storage::http::error::ErrorResponse;
-use google_cloud_storage::http::objects::Object;
-use active_storage::{drivers, StoreConfig};
-use active_storage::drivers::{Driver, gcp_storage};
-use active_storage::drivers::gcp_storage::ClientBuilderTrait;
 use crate::drivers::flow;
+use active_storage::{
+    drivers,
+    drivers::{gcp_storage, gcp_storage::ClientBuilderTrait, Driver},
+    StoreConfig,
+};
+use google_cloud_storage::http::{error::ErrorResponse, objects::Object, Error};
+use std::{path::PathBuf, time::SystemTime};
 
 const BUCKET_NAME: &str = "test-bucket";
 
@@ -29,7 +28,8 @@ impl ClientBuilderTrait for MockClient {
                 };
                 Err(Error::Response(error_response))
             },
-            Ok, )
+            Ok,
+        )
     }
 
     async fn get_object_details(&self, bucket: &str, path: &str) -> Result<Object, Error> {
@@ -59,10 +59,16 @@ impl ClientBuilderTrait for MockClient {
                 };
                 Err(Error::Response(error_response))
             },
-            Ok, )
+            Ok,
+        )
     }
 
-    async fn upload_objects(&self, bucket: &str, path: &str, content: Vec<u8>) -> Result<Object, Error> {
+    async fn upload_objects(
+        &self,
+        bucket: &str,
+        path: &str,
+        content: Vec<u8>,
+    ) -> Result<Object, Error> {
         assert_eq!(bucket, BUCKET_NAME);
         let path = PathBuf::from(path);
         let _ = self.inner.write(&path, content).await;
@@ -110,8 +116,10 @@ async fn inmem() {
     let mock_client = Box::new(MockClient {
         inner: drivers::inmem::InMemoryDriver::default(),
     });
-    let gcs_driver =
-        Box::new(gcp_storage::GoogleCloudStorage::with_client(BUCKET_NAME, mock_client)) as Box<dyn Driver>;
+    let gcs_driver = Box::new(gcp_storage::GoogleCloudStorage::with_client(
+        BUCKET_NAME,
+        mock_client,
+    )) as Box<dyn Driver>;
 
     let store = StoreConfig::with_driver(gcs_driver);
 
