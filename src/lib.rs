@@ -61,6 +61,8 @@ pub enum StoreConfig {
     AwsS3(drivers::aws_s3::Config),
     #[cfg(feature = "azure")]
     Azure(drivers::azure::Config),
+    #[cfg(feature = "gcp_storage")]
+    Gcp(drivers::gcp_storage::Config),
 }
 
 /// `StoreConfig` represents the configuration for creating a [`store::Store`]
@@ -106,6 +108,11 @@ impl StoreConfig {
             #[cfg(feature = "azure")]
             Self::Azure(config) => {
                 Box::new(drivers::azure::AzureDriver::new(config)) as Box<dyn drivers::Driver>
+            }
+            #[cfg(feature = "gcp_storage")]
+            Self::Gcp(config) => {
+                Box::new(drivers::gcp_storage::GoogleCloudStorage::new(config).await?)
+                    as Box<dyn drivers::Driver>
             }
         };
 

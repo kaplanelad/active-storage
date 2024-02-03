@@ -16,6 +16,8 @@ pub mod inmem;
 
 #[cfg(feature = "aws_s3")]
 pub mod aws_s3;
+#[cfg(feature = "gcp_storage")]
+pub mod gcp_storage;
 
 #[cfg(feature = "azure")]
 pub mod azure;

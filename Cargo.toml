@@ -26,6 +26,7 @@ azure = [
     "dep:futures",
     "dep:azure_core",
 ]
+gcp_storage = ["dep:google-cloud-storage"]
 
 [[example]]
 name = "aws_s3"
@@ -53,6 +54,9 @@ aws-sdk-s3 = { version = "1.8.0", features = [
 ], optional = true }
 aws-types = { version = "1.1.1", optional = true }
 
+# GCP
+google-cloud-storage = { version = "0.15.0", optional = true }
+
 # Azure
 azure_storage_blobs = { version = "0.19.0", optional = true }
 azure_storage = { version = "0.19.0", optional = true }
@@ -66,3 +70,4 @@ dockertest-server = { version = "0.1.7", features = ["cloud"] }
 lazy_static = "1.4.0"
 tree-fs = "0.1.0"
 rstest = "0.18.2"
+time = "0.3.33"
