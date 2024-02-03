@@ -20,7 +20,7 @@
 #![doc = include_str!("../examples/disk.rs")]
 //! # }
 //! ```
-//!
+//! 
 //! ### Mirroring
 //! ```rust
 //! # #[cfg(feature = "derive")] {

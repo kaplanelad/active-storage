@@ -1,7 +1,8 @@
-use crate::{
-    drivers::Driver,
-    errors::{DriverError, DriverResult},
+use std::{
+    path::{Path, PathBuf},
+    time::SystemTime,
 };
+
 use async_trait::async_trait;
 use dyn_clone::DynClone;
 use google_cloud_storage::{
@@ -19,9 +20,10 @@ use google_cloud_storage::{
         Error,
     },
 };
-use std::{
-    path::{Path, PathBuf},
-    time::SystemTime,
+
+use crate::{
+    drivers::Driver,
+    errors::{DriverError, DriverResult},
 };
 
 // Define a trait for the Google Cloud Storage client builders.
@@ -141,13 +143,15 @@ impl ClientBuilderTrait for Client {
     }
 }
 
-/// Configuration parameters for initializing a `GoogleCloudStorage` driver instance.
+/// Configuration parameters for initializing a `GoogleCloudStorage` driver
+/// instance.
 pub struct Config {
     /// The name of the Google Cloud Storage bucket.
     pub bucket: String,
     /// The project ID associated with the Google Cloud Storage.
     pub project_id: String,
-    /// Optional credentials for authenticating with the Google Cloud Storage service.
+    /// Optional credentials for authenticating with the Google Cloud Storage
+    /// service.
     pub credentials: Option<ClientCredentials>,
 }
 
@@ -157,10 +161,11 @@ pub enum ClientCredentials {
     CredentialFile(String),
 }
 
-/// The `GoogleCloudStorage` struct represents a Google Cloud Storage-based implementation of the `Driver`
-/// trait.
+/// The `GoogleCloudStorage` struct represents a Google Cloud Storage-based
+/// implementation of the `Driver` trait.
 ///
-/// It provides methods for interacting with files and directories on Google Cloud Storage.
+/// It provides methods for interacting with files and directories on Google
+/// Cloud Storage.
 pub struct GoogleCloudStorage {
     /// The Google Cloud Storage client used for communication with the service.
     client: Box<dyn ClientBuilderTrait>,
@@ -169,12 +174,14 @@ pub struct GoogleCloudStorage {
 }
 
 impl GoogleCloudStorage {
-    /// Initializes a new `GoogleCloudStorage` instance with the specified configuration.
+    /// Initializes a new `GoogleCloudStorage` instance with the specified
+    /// configuration.
     ///
     /// # Errors
     ///
-    /// If the credentials file is not found, returns an `DriverError::InvalidPath` error.
-    /// If the credentials file is invalid, returns an `DriverError::Any` error.
+    /// If the credentials file is not found, returns an
+    /// `DriverError::InvalidPath` error. If the credentials file is
+    /// invalid, returns an `DriverError::Any` error.
     ///
     /// # Returns
     ///
@@ -202,7 +209,8 @@ impl GoogleCloudStorage {
         })
     }
 
-    /// Creates a new `GoogleCloudStorage` instance with the provided `Client` and bucket name.
+    /// Creates a new `GoogleCloudStorage` instance with the provided `Client`
+    /// and bucket name.
     #[must_use]
     pub fn with_client(bucket: &str, client: Box<dyn ClientBuilderTrait>) -> Self {
         Self {
@@ -215,7 +223,8 @@ impl GoogleCloudStorage {
     ///
     /// # Errors
     ///
-    /// Returns an error if the path is invalid or issue occurs when listing files.
+    /// Returns an error if the path is invalid or issue occurs when listing
+    /// files.
     ///
     /// # Returns
     ///
@@ -248,11 +257,13 @@ impl Clone for GoogleCloudStorage {
 
 #[async_trait]
 impl Driver for GoogleCloudStorage {
-    /// Reads the contents of a file at the specific path within the Google Cloud Storage.
+    /// Reads the contents of a file at the specific path within the Google
+    /// Cloud Storage.
     ///
     /// # Errors
     ///
-    /// Returns an error if there is an issue reading from the file or decoding its contents.
+    /// Returns an error if there is an issue reading from the file or decoding
+    /// its contents.
     async fn read(&self, path: &Path) -> DriverResult<Vec<u8>> {
         let path = path.to_str().ok_or(DriverError::InvalidPath)?;
         let result = self.client.download_object(&self.bucket, path).await;
@@ -262,26 +273,31 @@ impl Driver for GoogleCloudStorage {
         }
     }
 
-    /// Checks if a file exists at the specified path within the Google Cloud Storage.
+    /// Checks if a file exists at the specified path within the Google Cloud
+    /// Storage.
     ///
     /// If the file does not point to a file, the method returns `Ok(false)`.
     /// Otherwise, it checks if the file exists and returns the result.
     ///
     /// # Errors
-    /// Returns an error if there is an issue occurs when checking existence of the file.
+    /// Returns an error if there is an issue occurs when checking existence of
+    /// the file.
     async fn file_exists(&self, path: &Path) -> DriverResult<bool> {
         let path_str = path.to_str().ok_or(DriverError::InvalidPath)?;
         let result = self.client.object_exists(&self.bucket, path_str).await?;
         Ok(result)
     }
 
-    /// Writes the provided content to a file at the specified path within the Google Cloud Storage.
+    /// Writes the provided content to a file at the specified path within the
+    /// Google Cloud Storage.
     ///
-    /// If the file does not exist, it is created. If the file exists, its contents are overwritten.
+    /// If the file does not exist, it is created. If the file exists, its
+    /// contents are overwritten.
     ///
     /// # Errors
     ///
-    /// Returns an error if there is any issue creating directories or writing to the file.
+    /// Returns an error if there is any issue creating directories or writing
+    /// to the file.
     async fn write(&self, path: &Path, content: Vec<u8>) -> DriverResult<()> {
         let path = path.to_str().ok_or(DriverError::InvalidPath)?;
         self.client
@@ -305,7 +321,8 @@ impl Driver for GoogleCloudStorage {
         Ok(())
     }
 
-    /// Deletes all the files under the given path within the Google Cloud Storage.
+    /// Deletes all the files under the given path within the Google Cloud
+    /// Storage.
     ///
     /// # Errors
     ///
