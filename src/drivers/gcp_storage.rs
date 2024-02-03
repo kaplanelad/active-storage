@@ -9,11 +9,12 @@ use google_cloud_storage::http::Error;
 use google_cloud_storage::http::objects::delete::DeleteObjectRequest;
 use google_cloud_storage::http::objects::download::Range;
 use google_cloud_storage::http::objects::get::GetObjectRequest;
-use google_cloud_storage::http::objects::list::{ListObjectsRequest, ListObjectsResponse};
+use google_cloud_storage::http::objects::list::ListObjectsRequest;
 use google_cloud_storage::http::objects::Object;
 use google_cloud_storage::http::objects::upload::{Media, UploadObjectRequest, UploadType};
 use crate::drivers::Driver;
 use crate::errors::{DriverError, DriverResult};
+
 
 // Define a trait for the Google Cloud Storage client builders.
 #[async_trait::async_trait]
@@ -158,7 +159,7 @@ impl GoogleCloudStorage {
         let credential_config = if let Some(credentials) = config.credentials {
             match credentials {
                 ClientCredentials::CredentialFile(path) => {
-                    let credentials_file = CredentialsFile::new_from_file(path).await.map_err(|e| DriverError::InvalidPath)?;
+                    let credentials_file = CredentialsFile::new_from_file(path).await.map_err(|_e| DriverError::InvalidPath)?;
                     ClientConfig::default().with_credentials(credentials_file).await.map_err(|e| DriverError::Any(Box::new(e)))?
                 }
             }
@@ -184,9 +185,15 @@ impl GoogleCloudStorage {
     ///
     /// A `Result` containing a vector of `PathBuf` representing the file paths,
     /// or an error
-    async fn get_all_files_in_path(&self, path: &Path) -> DriverResult<Vec<PathBuf>> {
-        let path = path.to_str().ok_or(DriverError::InvalidPath)?;
-        let paths = self.client.list_objects(&self.bucket, path).await?;
+    async fn get_all_files_in_path(&self, dir_path: &Path) -> DriverResult<Vec<PathBuf>> {
+        let prefix_folder = dir_path.to_str().ok_or(DriverError::InvalidPath)?;
+        let mut paths = Vec::new();
+        let container_paths = self.client.list_objects(&self.bucket, prefix_folder).await?;
+        for path in container_paths {
+            if path.starts_with(prefix_folder) {
+                paths.push(path);
+            }
+        }
         Ok(paths)
     }
 }
@@ -258,7 +265,7 @@ impl Driver for GoogleCloudStorage {
     /// `DriverError::ResourceNotFound` is returned.
     async fn delete(&self, path: &Path) -> DriverResult<()> {
         let path = path.to_str().ok_or(DriverError::InvalidPath)?;
-
+        self.client.delete_objects(&self.bucket, path).await?;
         Ok(())
     }
 
@@ -273,7 +280,7 @@ impl Driver for GoogleCloudStorage {
     /// `DriverError::DirectoryNotFound` is returned.
     async fn delete_directory(&self, path: &Path) -> DriverResult<()> {
         let paths_to_delete = self.get_all_files_in_path(path).await?;
-
+        println!("{:?}",paths_to_delete);
         if paths_to_delete.is_empty() {
             return Err(DriverError::ResourceNotFound);
         }
@@ -322,7 +329,7 @@ impl From<http::Error> for DriverError {
                     DriverError::Any(Box::new(e))
                 }
             }
-            http::Error::TokenSource(e) => Self::AuthenticationFailed,
+            http::Error::TokenSource(_e) => Self::AuthenticationFailed,
         }
     }
 }

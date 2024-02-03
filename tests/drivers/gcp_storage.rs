@@ -85,7 +85,7 @@ impl ClientBuilderTrait for MockClient {
         }
     }
 
-    async fn list_objects(&self, bucket: &str, path: &str) -> Result<Vec<PathBuf>, Error> {
+    async fn list_objects(&self, bucket: &str, _path: &str) -> Result<Vec<PathBuf>, Error> {
         assert_eq!(bucket, BUCKET_NAME);
         let keys: Vec<PathBuf> = self.inner.files.lock().unwrap().keys().cloned().collect();
         Ok(keys)
